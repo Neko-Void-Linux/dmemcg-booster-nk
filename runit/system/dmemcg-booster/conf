@@ -1,0 +1,3 @@
+# Executable and daemon arguments. See: dmemcg-booster --help
+DAEMON="/usr/bin/dmemcg-booster"
+OPTS="--system --interval-ms 1000"

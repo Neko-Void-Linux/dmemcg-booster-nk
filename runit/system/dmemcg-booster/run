@@ -1,0 +1,10 @@
+#!/bin/sh
+exec 2>&1
+
+[ -r ./conf ] && . ./conf
+: "${DAEMON:=/usr/bin/dmemcg-booster}"
+: "${OPTS:=--system --interval-ms 1000}"
+
+# OPTS is intentionally word-split so multiple CLI arguments can be supplied in conf.
+# shellcheck disable=SC2086
+exec "$DAEMON" ${OPTS}

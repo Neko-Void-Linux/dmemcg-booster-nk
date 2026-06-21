@@ -1,0 +1,5 @@
+#!/bin/sh
+
+logdir="${LOGDIR:-/var/log/dmemcg-booster}"
+mkdir -p "$logdir" || exit 1
+exec svlogd -tt "$logdir"

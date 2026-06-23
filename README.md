@@ -1,4 +1,4 @@
-# dmemcg-booster — systemd-free / runit port
+# dmemcg-booster / systemd-free / runit port
 
 This fork ports Valve's `dmemcg-booster` 0.1.2 from systemd D-Bus notifications to direct cgroup v2 scanning. It has no D-Bus or systemd runtime dependency.
 

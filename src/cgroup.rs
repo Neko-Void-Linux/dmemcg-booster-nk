@@ -157,20 +157,18 @@ impl CGroup {
             return Ok(false);
         }
 
-        let mut contents = String::new();
+        // Upstream 0.1.3 writes limit files line-per-line because the upstream
+        // dmem cgroup kernel patchset rejects multiple limit changes in one write.
         for (region, value) in limits {
-            contents.push_str(region);
-            contents.push(' ');
-            if *value == u64::MAX {
-                contents.push_str("max");
+            let value_str = if *value == u64::MAX {
+                "max".to_string()
             } else {
-                contents.push_str(&value.to_string());
-            }
-            contents.push('\n');
+                value.to_string()
+            };
+            let content = format!("{region} {value_str}");
+            fs::write(&path, content)?;
         }
 
-        let mut file = OpenOptions::new().write(true).open(path)?;
-        file.write_all(contents.as_bytes())?;
         Ok(true)
     }
 }
@@ -248,5 +246,31 @@ mod tests {
         assert!(parse_limits("gpu0 nope\n").is_err());
         assert!(parse_limits("gpu0 1 extra\n").is_err());
         assert!(parse_limits("gpu0\n").is_err());
+    }
+
+    #[test]
+    fn write_device_memory_low_writes_line_by_line() {
+        let unique = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let temp_dir = std::env::temp_dir().join(format!("cgroup-test-{unique}"));
+        fs::create_dir_all(&temp_dir).unwrap();
+        let cgroup = CGroup::hierarchy_root(&temp_dir).unwrap();
+
+        let mut limits = DMemLimit::new();
+        limits.insert("drm/0000:03:00.0/vram0".to_string(), 8514437120);
+
+        let written = cgroup.write_device_memory_low(&limits).unwrap();
+        assert!(written);
+
+        let content = fs::read_to_string(temp_dir.join("dmem.low")).unwrap();
+        assert_eq!(content, "drm/0000:03:00.0/vram0 8514437120");
+
+        // Second call with same limits returns false (no update needed)
+        let rewritten = cgroup.write_device_memory_low(&limits).unwrap();
+        assert!(!rewritten);
+
+        let _ = fs::remove_dir_all(&temp_dir);
     }
 }

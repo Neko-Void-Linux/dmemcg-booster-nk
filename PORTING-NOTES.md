@@ -7,3 +7,7 @@ The original daemon used systemd D-Bus only to discover new unit cgroups. The ac
 - **Leaves:** remain at their current `dmem.low` value. The foreground policy owner, such as Gamescope, controls those values.
 
 The scanner refuses to enable a domain controller in a non-root cgroup containing local processes, honoring cgroup v2's no-internal-process rule. Races with short-lived cgroups are ignored and handled on the next scan.
+
+## Upstream 0.1.3 sync
+
+In upstream 0.1.3, limits in `dmem.low` are written line-by-line (one per write operation). The upstream kernel `dmem` cgroup controller rejects multiple limit modifications in a single write syscall.

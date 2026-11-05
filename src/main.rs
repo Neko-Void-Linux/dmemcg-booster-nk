@@ -224,7 +224,7 @@ fn visit_cgroup(
         }
     };
     let delegated_boundary = match options.mode {
-        Mode::System => !group.is_hierarchy_root() && owner != 0,
+        Mode::System => !group.is_hierarchy_root() && owner != manager_uid,
         Mode::User => {
             group != scan_root && owner != manager_uid && !group.subtree_control_is_writable()
         }

@@ -4,4 +4,4 @@ version = 4
 
 [[package]]
 name = "dmemcg-booster"
-version = "0.1.2"
+version = "0.1.3"
